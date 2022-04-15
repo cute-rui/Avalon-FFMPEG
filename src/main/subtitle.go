@@ -36,7 +36,7 @@ func GetSubtitleCommand(index int, subtitle *ffmpeg.Subtitle) (string, []string,
     
     locale := strings.ReplaceAll(subtitle.GetLocaleText(), " ", "_")
     
-    args := []string{`-map`, strconv.Itoa(index + 2), StringBuilder(`-metadata:s:s:`, strconv.Itoa(index)), StringBuilder(`handler=`, locale)}
+    args := []string{`-map`, strconv.Itoa(index + 2), StringBuilder(`-metadata:s:s:`, strconv.Itoa(index)), StringBuilder(`title=<`, locale, `>`)}
     tag, err := language.Parse(subtitle.GetLocale())
     if err == nil {
         b, _ := tag.Base()
