@@ -14,12 +14,13 @@ func confInit() {
     Conf.SetConfigType("toml")
     Conf.SetConfigName("avalon-ffmpeg")
     Conf.AddConfigPath(`./soft/avalon/config/`)
+    Conf.SetDefault(`subtitle.dir`, `./`)
     Conf.SetDefault("service.addr", ":6221")
     replacer := strings.NewReplacer(".", "_")
     Conf.SetEnvKeyReplacer(replacer)
     err := Conf.ReadInConfig()
     if _, ok := err.(viper.ConfigFileNotFoundError); ok {
-        _, err := os.Create("./avalon-ffmpeg.toml")
+        _, err := os.Create("./soft/avalon/config/avalon-ffmpeg.toml")
         if err != nil {
             log.Println(err)
             return

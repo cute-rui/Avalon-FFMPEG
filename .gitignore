@@ -21,3 +21,7 @@ vendor/
 soft/
 *.log
 *.toml
+
+#blob
+*.mp4
+*.srt

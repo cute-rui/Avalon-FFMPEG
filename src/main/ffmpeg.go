@@ -6,6 +6,7 @@ import (
     "context"
     "google.golang.org/grpc/codes"
     "google.golang.org/grpc/status"
+    "os"
     "os/exec"
 )
 
@@ -14,7 +15,25 @@ type FFMPEGServiceWorker struct {
 }
 
 func (F FFMPEGServiceWorker) MergeVideo(ctx context.Context, param *ffmpeg.Param) (*ffmpeg.Info, error) {
-    cmd := exec.Command(`ffmpeg`, `-loglevel`, `error`, `-i`, param.InputVideo, `-i`, param.InputAudio, `-c`, `copy`, `-y`, param.OutputVideo)
+    raw := []string{`-loglevel`, `error`, `-i`, param.GetInputVideo(), `-i`, param.GetInputAudio()}
+    srtCache := []string{}
+    var args []string
+    for i := range param.GetSubtitles() {
+        if param.GetSubtitles()[i] != nil {
+            input, a, err := GetSubtitleCommand(i, param.GetSubtitles()[i])
+            if err != nil {
+                return nil, status.Error(codes.Internal, err.Error())
+            }
+            raw = append(raw, `-i`, input)
+            srtCache = append(srtCache, input)
+            args = append(args, a...)
+        }
+    }
+    
+    raw = append(raw, args...)
+    raw = append(raw, `-map`, `0:v`, `-map`, `1:a`, `-c:v`, `copy`, `-c:a`, `copy`, `-c:s`, `mov_text`, `-y`, param.GetOutputVideo())
+    
+    cmd := exec.Command(`ffmpeg`, raw...)
     
     var stderr bytes.Buffer
     cmd.Stderr = &stderr
@@ -27,6 +46,10 @@ func (F FFMPEGServiceWorker) MergeVideo(ctx context.Context, param *ffmpeg.Param
             return nil, status.Error(codes.Internal, errStr)
         }
         return nil, status.Error(codes.Internal, err.Error())
+    }
+    
+    for i := range srtCache {
+        os.Remove(srtCache[i])
     }
     
     return &ffmpeg.Info{
