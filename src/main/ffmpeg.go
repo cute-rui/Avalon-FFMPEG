@@ -31,7 +31,7 @@ func (F FFMPEGServiceWorker) MergeVideo(ctx context.Context, param *ffmpeg.Param
     }
     
     raw = append(raw, args...)
-    raw = append(raw, `-map`, `0:v`, `-map`, `1:a`, `-c:v`, `copy`, `-c:a`, `copy`, `-c:s`, `mov_text`, `-y`, param.GetOutputVideo())
+    raw = append(raw, `-map`, `0:v`, `-map`, `1:a`, `-c:v`, `copy`, `-c:a`, `copy`, `-c:s`, `srt`, `-y`, param.GetOutputVideo())
     
     cmd := exec.Command(`ffmpeg`, raw...)
     
